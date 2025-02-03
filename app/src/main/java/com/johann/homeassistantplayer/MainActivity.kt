@@ -38,21 +38,31 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        if(intent.extras?.getString("videoUrl") != null) {
-            Log.d("MainActivity", "playing URL: " + intent.extras?.getString("videoUrl"))
-            val videoUrl =
-                ("http://192.168.0.53:8123/local/" + intent.extras?.getString("videoUrl"))
-            initExoPlayerAndPlayUrl(this@MainActivity, videoUrl)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        Log.d("MainActivity", "handleIntent ${intent?.extras}")
+        if(intent!= null && intent.extras != null){
+            if(intent.extras?.getString("videoUrl") != null){
+                val videoUrl = intent.extras?.getString("videoUrl", "")?:""
+                initExoPlayerAndPlayUrl(this, "http://192.168.0.53:8123/local/" + videoUrl)
+            }
+            else if(intent.extras?.getString("turn") != null){
+                Log.d("MainActivity", "handleIntent turning "+intent.extras?.getString("turn")+" player")
+            }
+            else if(intent.extras?.getString("volume") != null){
+                Log.d("MainActivity", "handleIntent volume: " + intent.extras?.getString("volume"))
+            }
+            else if(intent.extras?.getString("mute") != null){
+                Log.d("MainActivity", "handleIntent mute: " + intent.extras?.getString("mute"))
+            }
         }
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        Log.d("MainActivity", "onNewIntent playing URL: " + intent.extras?.getString("videoUrl"))
-        intent.extras?.let {
-            val videoUrl = it.getString("videoUrl", "")
-            initExoPlayerAndPlayUrl(this, "http://192.168.0.53:8123/local/" + videoUrl)
-        }
+        handleIntent(intent)
     }
 
     private fun initExoPlayerAndPlayUrl(mainActivity: MainActivity, videoUrl: String) {
