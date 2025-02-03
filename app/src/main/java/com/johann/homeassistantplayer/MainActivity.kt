@@ -1,7 +1,9 @@
 package com.johann.homeassistantplayer
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,7 +28,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
                     Button(
                         onClick = {
-                            initExoPlayer(this@MainActivity)
+
                         },
                         modifier = Modifier.wrapContentSize(),
                         content = {
@@ -36,12 +38,25 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        if(intent.extras?.getString("videoUrl") != null) {
+            Log.d("MainActivity", "playing URL: " + intent.extras?.getString("videoUrl"))
+            val videoUrl =
+                ("http://192.168.0.53:8123/local/" + intent.extras?.getString("videoUrl"))
+            initExoPlayerAndPlayUrl(this@MainActivity, videoUrl)
+        }
     }
 
-    private fun initExoPlayer(mainActivity: MainActivity) {
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        Log.d("MainActivity", "onNewIntent playing URL: " + intent.extras?.getString("videoUrl"))
+        intent.extras?.let {
+            val videoUrl = it.getString("videoUrl", "")
+            initExoPlayerAndPlayUrl(this, "http://192.168.0.53:8123/local/" + videoUrl)
+        }
+    }
+
+    private fun initExoPlayerAndPlayUrl(mainActivity: MainActivity, videoUrl: String) {
         val player = ExoPlayer.Builder(mainActivity).build()
-        val videoUrl =
-            "http://192.168.0.53:8123/local/sounds/cat.mp3"
         val uri = Uri.parse(videoUrl)
         // Build the media item.
         val mediaItem = MediaItem.fromUri(uri)
